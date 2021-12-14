@@ -1,5 +1,8 @@
+using ContactManager.Database;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
@@ -13,7 +16,14 @@ namespace ReactProject
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            IHost host = CreateHostBuilder(args).Build();
+            using(IServiceScope serviceScope = host.Services.CreateScope())
+            {
+                var applicationDbContext = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                applicationDbContext.Database.Migrate();
+            }
+
+            host.Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
